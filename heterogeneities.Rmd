@@ -1,0 +1,118 @@
+---
+title: "Analysing heterogeneities and lineage-priming on HCR data"
+output: html_notebook
+---
+
+Setting working directory
+```{r setup, cache = FALSE, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_knit$set(root.dir = "")
+```
+
+Importing libraries
+```{r}
+library(plyr)
+library(tidyverse)
+library(stringr)
+library(qdapRegex)
+
+```
+
+Method
+
+```{r}
+processCsv <- function(myDf, geneNames, mySampleNo){
+  #ProcessCsv takes 3 arguments:
+  # 1) myCsvFiles is the csv file exported from imaris, in the data.frame format.
+  # 2) geneNames is a vector containing the gene names.
+  # 3) mySampleNo is an integer indicating the sample number.
+  # And returns a dataframe that has the relevant columns, with modified column names
+  myDf$sampleID = mySampleNo
+  csv <- select(myDf, starts_with("Intensity"), "ID", "sampleID")
+  colnames(csv)[1] <- geneNames
+  colnames(csv)[2] <- "cellID"
+  csv <- as.data.frame(csv)
+  return (csv)
+}
+
+```
+
+```{r}
+#Listing the directories 
+dir <- list.dirs(path = "./dataCsv/sox2_tbxta_csv")[-1]
+
+#Listing the full names of all csv file names within specified directories
+myDirCsv<- dir %>% 
+    map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
+```
+
+```{r}
+#Extracting the sample ID from the file names
+mySampleNo <- c()
+for (dir in myDirCsv){
+  myID <- rm_between(dir, "sample_", "/", extract=TRUE) %>%
+          unlist() %>%
+          unique()
+  mySampleNo <- c(mySampleNo, myID)
+}
+mySampleNo <- as.integer(mySampleNo)
+
+# Specify the gene names
+geneNames = c("sox2", "tbxta")
+
+```
+
+```{r}
+# Obtain a list containing the csvs. Two lapply are used because we have to extract the individual elements of the list to access the csv files.
+# See https://stackoverflow.com/questions/1169456/the-difference-between-bracket-and-double-bracket-for-accessing-the-el for subsetting details.
+
+myCsvFiles <- lapply(myDirCsv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
+
+```
+
+```{r}
+# Processing the individual csv files 
+
+# Initialising an empty vector to contain all the processed Csvs
+myCsvFilesProc <- vector("list", length = length(myCsvFiles))
+myCsvFilesProc_merged <- vector("list", length = length(myCsvFiles))
+
+# Looping through all elements of list
+
+for (i in 1:length(myCsvFiles)){
+  for (j in 1:length(geneNames)){
+    myCsvProcessed <- processCsv(myDf = myCsvFiles[[i]][[j]], 
+                                 geneNames = geneNames[j],
+                                 mySampleNo = mySampleNo[i])
+    myCsvFilesProc[[i]][[j]] <- myCsvProcessed
+  }
+  myCsvFilesProc_merged[[i]] <- merge(myCsvFilesProc[[i]][[1]], myCsvFilesProc[[i]][[2]], by = c("cellID", "sampleID"))
+}
+
+```
+
+```{r}
+#Combine all csv into one tidied csv. Also, min-max normalisation for each column and NM index calculation.
+#Index defined to be difference between sox2 and tbxta expression: negative values indicates higher tbxta to sox2 exp.
+
+df_combined <- myCsvFilesProc_merged %>%
+  reduce(rbind) %>%
+  group_by(sampleID) %>%
+  arrange(sampleID, cellID) %>%
+  mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
+  ungroup()%>%
+  mutate(nmIndex = .[[5]]-.[[6]])
+
+df_combined
+```
+
+Plotting the distribution
+```{r}
+p <- ggplot(df_combined, aes(x=nmIndex, fill = factor(sampleID))) + geom_histogram(binwidth=0.2, color = 'black') 
+p1 <- p + scale_x_continuous(name="NMindex", limits=c(-1, 1))
+p1
+```
+
+```{r}
+sessionInfo()
+```
