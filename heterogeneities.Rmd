@@ -15,6 +15,7 @@ library(plyr)
 library(tidyverse)
 library(stringr)
 library(qdapRegex)
+library(viridis)
 #random change
 #random change 2
 
@@ -112,7 +113,8 @@ Plotting the distribution
 ```{r}
 p <- ggplot(df_combined, aes(x=nmIndex, fill = factor(sampleID))) + geom_histogram(binwidth=0.2, color = 'black') 
 p1 <- p + scale_x_continuous(name="NMindex", limits=c(-1, 1))
-p1
+p2 <- p1 +scale_fill_manual(values=plasma(n=9))
+p2
 ```
 
 ```{r}
