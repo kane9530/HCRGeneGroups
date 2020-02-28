@@ -1,163 +1,348 @@
-# Hi, this is just a place where I experiment weirdly with the code
-
-
-#Importing libraries
 
 library(plyr)
+library(dplyr)
 library(tidyverse)
 library(stringr)
 library(qdapRegex)
 library(viridis)
-
-#Method
-
-processCsv <- function(myDf, geneNames, mySampleNo){
-  #ProcessCsv takes 3 arguments:
-  # 1) myCsvFiles is the csv file exported from imaris, in the data.frame format.
-  # 2) geneNames is a vector containing the gene names.
-  # 3) mySampleNo is an integer indicating the sample number.
-  # And returns a dataframe that has the relevant columns, with modified column names
-  myDf$sampleID = mySampleNo
-  csv <- select(myDf, starts_with("Intensity"), "ID", "sampleID")
-  colnames(csv)[1] <- geneNames
-  colnames(csv)[2] <- "cellID"
+library(ggpubr)
+# 18ss
+processcsv18 <- function(my_df, gene_names, my_sample_no_18){
+  my_df$sample_ID = my_sample_no_18
+  csv <- select(my_df, starts_with("Intensity"), "ID", "sample_ID")
+  colnames(csv)[1] <- gene_names
+  colnames(csv)[2] <- "cell_ID"
   csv <- as.data.frame(csv)
   return (csv)
 }
 
-
-
-#Listing the directories for 18ss
-
 dir18ss <- list.dirs(path = "./dataCsv/18ss")[-1]
 
-#Listing the full names of all csv file names within specified directories
-myDirCsv<- dir18ss %>% 
+my_dir18ss_csv<- dir18ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
 
-
-#Extracting the sample ID from the file names
-mySampleNo <- c()
-for (dir18ss in myDirCsv){
-  myID <- rm_between(dir18ss, "sample_", "/", extract=TRUE) %>%
+my_sample_no_18 <- c()
+for (dir18ss in my_dir18ss_csv){
+  my_ID_18 <- rm_between(dir18ss, "sample_", "/", extract=TRUE) %>%
     unlist() %>%
     unique()
-  mySampleNo <- c(mySampleNo, myID)
+  my_sample_no_18 <- c(my_sample_no_18, my_ID_18)
 }
-mySampleNo <- as.integer(mySampleNo)
 
-# Specify the gene names
-geneNames = c("sox2", "tbxta")
+my_sample_no_18 <- as.integer(my_sample_no_18)
 
+gene_names = c("sox2", "tbxta")
 
-# Obtain a list containing the csvs. Two lapply are used because we have to extract the individual elements of the list to access the csv files.
-# See https://stackoverflow.com/questions/1169456/the-difference-between-bracket-and-double-bracket-for-accessing-the-el for subsetting details.
+my_csv_files_18 <- lapply(my_dir18ss_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
 
-myCsvFiles <- lapply(myDirCsv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
+my_csv_files_proc_18 <- vector("list", length = length(my_csv_files_18))
+my_csv_files_proc_merged_18 <- vector("list", length = length(my_csv_files_18))
 
-
-
-# Processing the individual csv files 
-
-# Initialising an empty vector to contain all the processed Csvs
-myCsvFilesProc <- vector("list", length = length(myCsvFiles))
-myCsvFilesProc_merged <- vector("list", length = length(myCsvFiles))
-
-# Looping through all elements of list
-
-for (i in 1:length(myCsvFiles)){
-  for (j in 1:length(geneNames)){
-    myCsvProcessed <- processCsv(myDf = myCsvFiles[[i]][[j]], 
-                                 geneNames = geneNames[j],
-                                 mySampleNo = mySampleNo[i])
-    myCsvFilesProc[[i]][[j]] <- myCsvProcessed
+for (i in 1:length(my_csv_files_18)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_18 <- processcsv18(my_df = my_csv_files_18[[i]][[j]], 
+                                        gene_names = gene_names[j],
+                                        my_sample_no_18 = my_sample_no_18[i])
+    my_csv_files_proc_18[[i]][[j]] <- my_csv_processed_18
   }
-  myCsvFilesProc_merged[[i]] <- merge(myCsvFilesProc[[i]][[1]], myCsvFilesProc[[i]][[2]], by = c("cellID", "sampleID"))
+  my_csv_files_proc_merged_18[[i]] <- merge(my_csv_files_proc_18[[i]][[1]], my_csv_files_proc_18[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  #my_csv_files_proc_merged_18[[i]] <- bind_rows(list(my_csv_files_proc_18[i][1],my_csv_files_proc_18[i][2],my_csv_files_proc_18[i][3]))
 }
 
 
-
-#Combine all csv into one tidied csv. Also, min-max normalisation for each column and NM index calculation.
-#Index defined to be difference between sox2 and tbxta expression: negative values indicates higher tbxta to sox2 exp.
-
-df_combined <- myCsvFilesProc_merged %>%
+df_combined_18 <- my_csv_files_proc_merged_18 %>%
   reduce(rbind) %>%
-  group_by(sampleID) %>%
-  arrange(sampleID, cellID) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) %>%
   mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
   ungroup()%>%
-  mutate(nmIndex = .[[5]]-.[[6]])
+  mutate(nm_index = .[[5]]-.[[6]])
 
-df_combined
+#View(df_combined_18)
 
-#Plotting the distribution
+p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
+p1_18 <- p_18 + scale_x_continuous(name="NMindex", limits=c(-1, 1))
+p2_18 <- p1_18 +scale_fill_manual(values=plasma(n=length(my_csv_files_18))) + theme_minimal()
+p3_18 <- p2_18 + ggtitle("18 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
+p3_18
 
-p <- ggplot(df_combined, aes(x=nmIndex, fill = factor(sampleID))) + geom_histogram(binwidth=0.2, color = 'black') 
-p1 <- p + scale_x_continuous(name="NMindex", limits=c(-1, 1))
-p2 <- p1 +scale_fill_manual(values=plasma(n=9))
-p2
+line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
+  geom_density(colour = "darkred")
+line_18
 
-#time to extend this
 
-#Listing the directories for 21ss
+# 21ss
+processcsv21 <- function(my_df, gene_names, my_sample_no_21){
+  my_df$sample_ID = my_sample_no_21
+  csv <- select(my_df, starts_with("Intensity"), "ID", "sample_ID")
+  colnames(csv)[1] <- gene_names
+  colnames(csv)[2] <- "cell_ID"
+  csv <- as.data.frame(csv)
+  return (csv)
+}
+
 dir21ss <- list.dirs(path = "./dataCsv/21ss")[-1]
 
-myDir21ssCsv<- dir21ss %>% 
+my_dir21ss_csv<- dir21ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
 
-mySampleNo <- c()
-for (dir21ss in myDir21ssCsv){
-  myID <- rm_between(dir21ss, "sample_", "/", extract=TRUE) %>%
+my_sample_no_21 <- c()
+for (dir21ss in my_dir21ss_csv){
+  my_ID_21 <- rm_between(dir21ss, "sample_", "/", extract=TRUE) %>%
     unlist() %>%
     unique()
-  mySampleNo <- c(mySampleNo, myID)
+  my_sample_no_21 <- c(my_sample_no_21, my_ID_21)
 }
-mySampleNo <- as.integer(mySampleNo)
 
-geneNames = c("sox2", "tbxta")
+my_sample_no_21 <- as.integer(my_sample_no_21)
 
-myCsvFiles <- lapply(myDir21ssCsv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
+gene_names = c("sox2", "tbxta")
 
-myCsvFilesProc <- vector("list", length = length(myCsvFiles))
-myCsvFilesProc_merged <- vector("list", length = length(myCsvFiles))
+my_csv_files_21 <- lapply(my_dir21ss_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
 
+my_csv_files_proc_21 <- vector("list", length = length(my_csv_files_21))
+my_csv_files_proc_merged_21 <- vector("list", length = length(my_csv_files_21))
 
-for (i in 1:length(myCsvFiles)){
-  for (j in 1:length(geneNames)){
-    myCsvProcessed <- processCsv(myDf = myCsvFiles[[i]][[j]], 
-                                 geneNames = geneNames[j],
-                                 mySampleNo = mySampleNo[i])
-    myCsvFilesProc[[i]][[j]] <- myCsvProcessed
+for (i in 1:length(my_csv_files_21)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_21 <- processcsv21(my_df = my_csv_files_21[[i]][[j]], 
+                                        gene_names = gene_names[j],
+                                        my_sample_no_21 = my_sample_no_21[i])
+    my_csv_files_proc_21[[i]][[j]] <- my_csv_processed_21
   }
-  myCsvFilesProc_merged[[i]] <- merge(myCsvFilesProc[[i]][[1]], myCsvFilesProc[[i]][[2]], by = c("cellID", "sampleID"))
+  my_csv_files_proc_merged_21[[i]] <- merge(my_csv_files_proc_21[[i]][[1]], my_csv_files_proc_21[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  #my_csv_files_proc_merged_21[[i]] <- bind_rows(list(my_csv_files_proc_21[i][1],my_csv_files_proc_21[i][2],my_csv_files_proc_21[i][3]))
 }
 
 
-df_combined <- myCsvFilesProc_merged %>%
+df_combined_21 <- my_csv_files_proc_merged_21 %>%
   reduce(rbind) %>%
-  group_by(sampleID) %>%
-  arrange(sampleID, cellID) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) %>%
   mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
   ungroup()%>%
-  mutate(nmIndex = .[[5]]-.[[6]])
+  mutate(nm_index = .[[5]]-.[[6]])
 
-df_combined
+#View(df_combined_21)
 
-p <- ggplot(df_combined, aes(x=nmIndex, fill = factor(sampleID))) + geom_histogram(binwidth=0.2, color = 'black') 
-p1 <- p + scale_x_continuous(name="NMindex", limits=c(-1, 1))
-p2 <- p1 +scale_fill_manual(values=plasma(n=12))
-p2
+p_21 <- ggplot(df_combined_21, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
+p1_21 <- p_21 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
+p2_21 <- p1_21 +scale_fill_manual(values=plasma(n=length(my_csv_files_21)))
+p3_21 <- p2_21 + ggtitle("21 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
+p3_21
 
-#the question is, can I automate this.
-#he says use a lapply function
-dir21ss <- list.dirs(path = "./dataCsv/21ss")[-1]
+line_21 <- ggplot(df_combined_21, aes(x=nm_index))+
+  geom_density(colour = "red")
+line_21
 
-myDir21ssCsv<- dir21ss %>% 
+# 24ss 
+
+processcsv24 <- function(my_df, gene_names, my_sample_no_24){
+  my_df$sample_ID = my_sample_no_24
+  csv <- select(my_df, starts_with("Intensity"), "ID", "sample_ID")
+  colnames(csv)[1] <- gene_names
+  colnames(csv)[2] <- "cell_ID"
+  csv <- as.data.frame(csv)
+  return (csv)
+}
+
+dir24ss <- list.dirs(path = "./dataCsv/24ss")[-1]
+
+my_dir24ss_csv<- dir24ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
 
-somitestages <- list.dirs(path="./dataCsv", recursive = FALSE)
 
-what <- somitestages %>% 
-  map(~list.files(path = ., pattern = "\\.csv$", full.names = TRUE)
+my_sample_no_24 <- c()
+for (dir24ss in my_dir24ss_csv){
+  my_ID_24 <- rm_between(dir24ss, "sample_", "/", extract=TRUE) %>%
+    unlist() %>%
+    unique()
+  my_sample_no_24 <- c(my_sample_no_24, my_ID_24)
+}
 
-for (somitestage in datacsvfile)
+my_sample_no_24 <- as.integer(my_sample_no_24)
+
+gene_names = c("sox2", "tbxta","oct4")
+
+my_csv_files_24 <- lapply(my_dir24ss_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
+
+my_csv_files_proc_24 <- vector("list", length = length(my_csv_files_24))
+my_csv_files_proc_merged_24 <- vector("list", length = length(my_csv_files_24))
+
+for (i in 1:length(my_csv_files_24)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_24 <- processcsv24(my_df = my_csv_files_24[[i]][[j]], 
+                                        gene_names = gene_names[j],
+                                        my_sample_no_24 = my_sample_no_24[i])
+    my_csv_files_proc_24[[i]][[j]] <- my_csv_processed_24
+  }
+  my_csv_files_proc_merged_24[[i]] <- merge(my_csv_files_proc_24[[i]][[1]], my_csv_files_proc_24[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  #my_csv_files_proc_merged_24[[i]] <- bind_rows(list(my_csv_files_proc_24[i][1],my_csv_files_proc_24[i][2],my_csv_files_proc_24[i][3]))
+}
+
+
+df_combined_24 <- my_csv_files_proc_merged_24 %>%
+  reduce(rbind) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) %>%
+  mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
+  ungroup()%>%
+  mutate(nm_index = .[[5]]-.[[6]])
+
+#View(df_combined_24)
+
+p_24 <- ggplot(df_combined_24, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
+p1_24 <- p_24 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
+p2_24 <- p1_24 +scale_fill_manual(values=plasma(n=length(my_csv_files_24)))
+p3_24 <- p2_24 + ggtitle("24 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
+p3_24
+
+line_24 <- ggplot(df_combined_24, aes(x=nm_index))+
+  geom_density(colour = "orange")
+line_24
+# 26-28ss
+processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
+  my_df$sample_ID = my_sample_no_2628ss
+  csv <- select(my_df, starts_with("Intensity"), "ID", "sample_ID")
+  colnames(csv)[1] <- gene_names
+  colnames(csv)[2] <- "cell_ID"
+  csv <- as.data.frame(csv)
+  return (csv)
+}
+
+dir2628ss <- list.dirs(path = "./dataCsv/26-28ss")[-1]
+
+my_dir2628ss_csv<- dir2628ss %>% 
+  map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
+
+my_sample_no_2628ss <- c()
+for (dir2628ss in my_dir2628ss_csv){
+  my_ID_2628ss <- rm_between(dir2628ss, "sample_", "/", extract=TRUE) %>%
+    unlist() %>%
+    unique()
+  my_sample_no_2628ss <- c(my_sample_no_2628ss, my_ID_2628ss)
+}
+
+my_sample_no_2628ss <- as.integer(my_sample_no_2628ss)
+
+gene_names = c("sox2", "tbxta")
+
+my_csv_files_2628ss <- lapply(my_dir2628ss_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
+
+my_csv_files_proc_2628ss <- vector("list", length = length(my_csv_files_2628ss))
+my_csv_files_proc_merged_2628ss <- vector("list", length = length(my_csv_files_2628ss))
+
+for (i in 1:length(my_csv_files_2628ss)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_2628ss <- processcsv2628ss(my_df = my_csv_files_2628ss[[i]][[j]], 
+                                                gene_names = gene_names[j],
+                                                my_sample_no_2628ss = my_sample_no_2628ss[i])
+    my_csv_files_proc_2628ss[[i]][[j]] <- my_csv_processed_2628ss
+  }
+  my_csv_files_proc_merged_2628ss[[i]] <- merge(my_csv_files_proc_2628ss[[i]][[1]], my_csv_files_proc_2628ss[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  #my_csv_files_proc_merged_2628ss[[i]] <- bind_rows(list(my_csv_files_proc_2628ss[i][1],my_csv_files_proc_2628ss[i][2],my_csv_files_proc_2628ss[i][3]))
+}
+
+
+df_combined_2628ss <- my_csv_files_proc_merged_2628ss %>%
+  reduce(rbind) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) %>%
+  mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
+  ungroup()%>%
+  mutate(nm_index = .[[5]]-.[[6]])
+
+#View(df_combined_2628ss)
+
+p_2628 <- ggplot(df_combined_2628ss, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
+p1_2628 <- p_2628 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
+p2_2628 <- p1_2628 +scale_fill_manual(values=plasma(n=length(my_csv_files_2628ss)))
+p3_2628 <- p2_2628 + ggtitle("26-28 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
+p3_2628
+
+line_2628ss <- ggplot(df_combined_2628ss, aes(x=nm_index))+
+  geom_density(colour = "yellow")
+line_2628ss
+# 30ss
+
+processcsv30ss <- function(my_df, gene_names, my_sample_no_30ss){
+  my_df$sample_ID = my_sample_no_30ss
+  csv <- select(my_df, starts_with("Intensity"), "ID", "sample_ID")
+  colnames(csv)[1] <- gene_names
+  colnames(csv)[2] <- "cell_ID"
+  csv <- as.data.frame(csv)
+  return (csv)
+}
+
+dir30ss <- list.dirs(path = "./dataCsv/30ss")[-1]
+
+my_dir30ss_csv<- dir30ss %>% 
+  map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
+
+my_sample_no_30ss <- c()
+for (dir30ss in my_dir30ss_csv){
+  my_ID_30ss <- rm_between(dir30ss, "sample_", "/", extract=TRUE) %>%
+    unlist() %>%
+    unique()
+  my_sample_no_30ss <- c(my_sample_no_30ss, my_ID_30ss)
+}
+
+my_sample_no_30ss <- as.integer(my_sample_no_30ss)
+
+gene_names = c("sox2", "tbxta")
+
+my_csv_files_30ss <- lapply(my_dir30ss_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
+
+my_csv_files_proc_30ss <- vector("list", length = length(my_csv_files_30ss))
+my_csv_files_proc_merged_30ss <- vector("list", length = length(my_csv_files_30ss))
+
+for (i in 1:length(my_csv_files_30ss)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_30ss <- processcsv30ss(my_df = my_csv_files_30ss[[i]][[j]], 
+                                            gene_names = gene_names[j],
+                                            my_sample_no_30ss = my_sample_no_30ss[i])
+    my_csv_files_proc_30ss[[i]][[j]] <- my_csv_processed_30ss
+  }
+  my_csv_files_proc_merged_30ss[[i]] <- merge(my_csv_files_proc_30ss[[i]][[1]], my_csv_files_proc_30ss[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  #my_csv_files_proc_merged_30ss[[i]] <- bind_rows(list(my_csv_files_proc_30ss[i][1],my_csv_files_proc_30ss[i][2],my_csv_files_proc_30ss[i][3]))
+}
+
+
+df_combined_30ss <- my_csv_files_proc_merged_30ss %>%
+  reduce(rbind) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) %>%
+  mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
+  ungroup()%>%
+  mutate(nm_index = .[[5]]-.[[6]])
+
+#View(df_combined_30ss)
+
+p_30 <- ggplot(df_combined_30ss, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
+p1_30 <- p_30 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
+p2_30 <- p1_30 +scale_fill_manual(values=plasma(n=length(my_csv_files_2628ss)))
+p3_30 <- p2_30 + ggtitle("30 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
+p3_30
+
+line_30ss <- ggplot(df_combined_30ss, aes(x=nm_index, y=))+
+  geom_density(colour = "green")
+#geom_freqpoly()
+line_30ss
+
+# combine/compare graphs 
+
+ggarrange(p3_18, p3_21, p3_24, p3_2628, p3_30 + rremove("ylab"),
+          ncol = 5, nrow = 1)
+
+#and then something with plyrs join(), actually maybe rowbind
+#but first, for each one, use addcolumn 
+files_somitestages <- list.dirs(path="./dataCsv", recursive = FALSE)
+somitestages <- basename(files_somitestages)
+directory <- as.character()
+
+
+for ( i in 1:length(somitestages)){
+  directory <- list.dirs(path = "./dataCsv")
+  mydirectory <- directory[i+1]%>% 
+    map(~list.(path = ., pattern="\\.csv$", full.names = TRUE))
+}
