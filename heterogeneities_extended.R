@@ -16,7 +16,7 @@ processcsv18 <- function(my_df, gene_names, my_sample_no_18){
   return (csv)
 }
 
-dir18ss <- list.dirs(path = "./dataCsv/18ss")[-1]
+dir18ss <- list.dirs(path = "./newdataCsv/18ss")[-1]
 
 my_dir18ss_csv<- dir18ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -67,7 +67,7 @@ p3_18 <- p2_18 + ggtitle("18 somite stage") + theme(legend.position = "none") + 
 p3_18
 
 line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
-  geom_density(colour = "darkred")
+  geom_density(colour = "darkred") + theme_minimal()+ ggtitle("18 somite stage")+theme(plot.title = element_text(hjust = 0.5))
 line_18
 
 
@@ -81,7 +81,7 @@ processcsv21 <- function(my_df, gene_names, my_sample_no_21){
   return (csv)
 }
 
-dir21ss <- list.dirs(path = "./dataCsv/21ss")[-1]
+dir21ss <- list.dirs(path = "./newdataCsv/21ss")[-1]
 
 my_dir21ss_csv<- dir21ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -105,7 +105,7 @@ my_csv_files_proc_merged_21 <- vector("list", length = length(my_csv_files_21))
 
 for (i in 1:length(my_csv_files_21)){
   for (j in 1:length(gene_names)){
-    my_csv_processed_21 <- processcsv21(my_df = my_csv_files_21[[i]][[j]], 
+    my_csv_processed_21 <- processcsv21(my_df = my_csv_files_21[[i]][[j+1]], 
                                         gene_names = gene_names[j],
                                         my_sample_no_21 = my_sample_no_21[i])
     my_csv_files_proc_21[[i]][[j]] <- my_csv_processed_21
@@ -132,7 +132,7 @@ p3_21 <- p2_21 + ggtitle("21 somite stage") + theme(legend.position = "none") + 
 p3_21
 
 line_21 <- ggplot(df_combined_21, aes(x=nm_index))+
-  geom_density(colour = "red")
+  geom_density(colour = "orange")+ theme_minimal()+ ggtitle("21 somite stage")+theme(plot.title = element_text(hjust = 0.5))
 line_21
 
 # 24ss 
@@ -146,7 +146,7 @@ processcsv24 <- function(my_df, gene_names, my_sample_no_24){
   return (csv)
 }
 
-dir24ss <- list.dirs(path = "./dataCsv/24ss")[-1]
+dir24ss <- list.dirs(path = "./newdataCsv/24ss")[-1]
 
 my_dir24ss_csv<- dir24ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -162,7 +162,7 @@ for (dir24ss in my_dir24ss_csv){
 
 my_sample_no_24 <- as.integer(my_sample_no_24)
 
-gene_names = c("sox2", "tbxta","oct4")
+gene_names = c("sox2", "tbxta")
 
 my_csv_files_24 <- lapply(my_dir24ss_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
 
@@ -171,7 +171,7 @@ my_csv_files_proc_merged_24 <- vector("list", length = length(my_csv_files_24))
 
 for (i in 1:length(my_csv_files_24)){
   for (j in 1:length(gene_names)){
-    my_csv_processed_24 <- processcsv24(my_df = my_csv_files_24[[i]][[j]], 
+    my_csv_processed_24 <- processcsv24(my_df = my_csv_files_24[[i]][[j+1]], 
                                         gene_names = gene_names[j],
                                         my_sample_no_24 = my_sample_no_24[i])
     my_csv_files_proc_24[[i]][[j]] <- my_csv_processed_24
@@ -198,7 +198,7 @@ p3_24 <- p2_24 + ggtitle("24 somite stage") + theme(legend.position = "none") + 
 p3_24
 
 line_24 <- ggplot(df_combined_24, aes(x=nm_index))+
-  geom_density(colour = "orange")
+  geom_density(colour = "gold")+ theme_minimal()+ ggtitle("24 somite stage")+theme(plot.title = element_text(hjust = 0.5))
 line_24
 # 26-28ss
 processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
@@ -210,7 +210,7 @@ processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
   return (csv)
 }
 
-dir2628ss <- list.dirs(path = "./dataCsv/26-28ss")[-1]
+dir2628ss <- list.dirs(path = "./newdataCsv/26-28ss")[-1]
 
 my_dir2628ss_csv<- dir2628ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -234,7 +234,7 @@ my_csv_files_proc_merged_2628ss <- vector("list", length = length(my_csv_files_2
 
 for (i in 1:length(my_csv_files_2628ss)){
   for (j in 1:length(gene_names)){
-    my_csv_processed_2628ss <- processcsv2628ss(my_df = my_csv_files_2628ss[[i]][[j]], 
+    my_csv_processed_2628ss <- processcsv2628ss(my_df = my_csv_files_2628ss[[i]][[j+1]], 
                                                 gene_names = gene_names[j],
                                                 my_sample_no_2628ss = my_sample_no_2628ss[i])
     my_csv_files_proc_2628ss[[i]][[j]] <- my_csv_processed_2628ss
@@ -261,7 +261,8 @@ p3_2628 <- p2_2628 + ggtitle("26-28 somite stage") + theme(legend.position = "no
 p3_2628
 
 line_2628ss <- ggplot(df_combined_2628ss, aes(x=nm_index))+
-  geom_density(colour = "yellow")
+  geom_density(colour = "green")+ theme_minimal()+ ggtitle("26-28 somite stage")+theme(plot.title = element_text(hjust = 0.5))
+
 line_2628ss
 # 30ss
 
@@ -274,7 +275,7 @@ processcsv30ss <- function(my_df, gene_names, my_sample_no_30ss){
   return (csv)
 }
 
-dir30ss <- list.dirs(path = "./dataCsv/30ss")[-1]
+dir30ss <- list.dirs(path = "./newdataCsv/30ss")[-1]
 
 my_dir30ss_csv<- dir30ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -298,7 +299,7 @@ my_csv_files_proc_merged_30ss <- vector("list", length = length(my_csv_files_30s
 
 for (i in 1:length(my_csv_files_30ss)){
   for (j in 1:length(gene_names)){
-    my_csv_processed_30ss <- processcsv30ss(my_df = my_csv_files_30ss[[i]][[j]], 
+    my_csv_processed_30ss <- processcsv30ss(my_df = my_csv_files_30ss[[i]][[j+1]], 
                                             gene_names = gene_names[j],
                                             my_sample_no_30ss = my_sample_no_30ss[i])
     my_csv_files_proc_30ss[[i]][[j]] <- my_csv_processed_30ss
@@ -325,24 +326,49 @@ p3_30 <- p2_30 + ggtitle("30 somite stage") + theme(legend.position = "none") + 
 p3_30
 
 line_30ss <- ggplot(df_combined_30ss, aes(x=nm_index, y=))+
-  geom_density(colour = "green")
-#geom_freqpoly()
+  geom_density(colour = "blue")+ theme_minimal()+ ggtitle("30 somite stage")+theme(plot.title = element_text(hjust = 0.5))
 line_30ss
+
+# combine dataframes
+
+df_final_18 <- df_combined_18 %>% 
+  add_column(somite_stage = somitestages[1])
+
+df_final_21 <- df_combined_21 %>% 
+  add_column(somite_stage = somitestages[2])
+
+df_final_24 <- df_combined_24 %>% 
+  add_column(somite_stage = somitestages[3])
+
+df_final_2628 <- df_combined_2628ss %>% 
+  add_column(somite_stage = somitestages[4])
+
+df_final_30 <- df_combined_30ss %>% 
+  add_column(somite_stage = somitestages[5])
+
+df_combined_final <- df_final_18 %>% 
+  rbind(df_final_21) %>% 
+  rbind(df_final_24) %>% 
+  rbind(df_final_2628) %>% 
+  rbind(df_final_30)
 
 # combine/compare graphs 
 
-ggarrange(p3_18, p3_21, p3_24, p3_2628, p3_30 + rremove("ylab"),
+ggarrange(p3_18, p3_21 + rremove("ylab"), p3_24 + rremove("ylab"), p3_2628 + rremove("ylab"), p3_30 + rremove("ylab"),
+          ncol = 5, nrow = 1)
+
+ggarrange(line_18, line_21  + rremove("ylab"), line_24 + rremove("ylab"), line_2628ss + rremove("ylab"), line_30ss + rremove("ylab"), 
           ncol = 5, nrow = 1)
 
 #and then something with plyrs join(), actually maybe rowbind
 #but first, for each one, use addcolumn 
-files_somitestages <- list.dirs(path="./dataCsv", recursive = FALSE)
+files_somitestages <- list.dirs(path="./newdataCsv", recursive = FALSE)
 somitestages <- basename(files_somitestages)
 directory <- as.character()
 
 
 for ( i in 1:length(somitestages)){
-  directory <- list.dirs(path = "./dataCsv")
+  directory <- list.dirs(path = "./newdataCsv")
   mydirectory <- directory[i+1]%>% 
     map(~list.(path = ., pattern="\\.csv$", full.names = TRUE))
 }
