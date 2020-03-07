@@ -17,7 +17,7 @@ processcsv18 <- function(my_df, gene_names, my_sample_no_18){
   return (csv)
 }
 
-dir18ss <- list.dirs(path = "./newdataCsv/18ss")[-1]
+dir18ss <- list.dirs(path = "./dataCsv/18ss")[-1]
 
 my_dir18ss_csv<- dir18ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -82,7 +82,7 @@ processcsv21 <- function(my_df, gene_names, my_sample_no_21){
   return (csv)
 }
 
-dir21ss <- list.dirs(path = "./newdataCsv/21ss")[-1]
+dir21ss <- list.dirs(path = "./dataCsv/21ss")[-1]
 
 my_dir21ss_csv<- dir21ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -147,7 +147,7 @@ processcsv24 <- function(my_df, gene_names, my_sample_no_24){
   return (csv)
 }
 
-dir24ss <- list.dirs(path = "./newdataCsv/24ss")[-1]
+dir24ss <- list.dirs(path = "./dataCsv/24ss")[-1]
 
 my_dir24ss_csv<- dir24ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -211,7 +211,7 @@ processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
   return (csv)
 }
 
-dir2628ss <- list.dirs(path = "./newdataCsv/26-28ss")[-1]
+dir2628ss <- list.dirs(path = "./dataCsv/26-28ss")[-1]
 
 my_dir2628ss_csv<- dir2628ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -276,7 +276,7 @@ processcsv30ss <- function(my_df, gene_names, my_sample_no_30ss){
   return (csv)
 }
 
-dir30ss <- list.dirs(path = "./newdataCsv/30ss")[-1]
+dir30ss <- list.dirs(path = "./dataCsv/30ss")[-1]
 
 my_dir30ss_csv<- dir30ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -391,7 +391,7 @@ compare_lines
 
 #and then something with plyrs join(), actually maybe rowbind
 #but first, for each one, use addcolumn 
-files_somitestages <- list.dirs(path="./newdataCsv", recursive = T)
+files_somitestages <- list.dirs(path="./dataCsv", recursive = T)
 somite_s18 <- str_detect(files_somitestages, pattern = "18ss")
 somitestages <- basename(files_somitestages)# %>% 
   #str_detect(pattern = "ss")
@@ -399,7 +399,7 @@ directory <- as.character()
 
 
 for ( i in 1:length(somitestages)){
-  directory <- list.dirs(path = "./newdataCsv")
+  directory <- list.dirs(path = "./dataCsv")
   mydirectory <- directory[i+1]%>% 
     map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE))
 }
