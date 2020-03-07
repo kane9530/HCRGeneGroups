@@ -138,5 +138,21 @@ line_lineage
 #plotting both nm index and lineage
 
 p_nmp_lineage <- ggplot(df_combined, aes(x=nm_index, y=lineage_index))+
-  geom_point(color = factor(df_combined$sample_ID))
+  geom_point(color = "grey")+
+  geom_smooth(method = "lm", color="navy", fill="lightblue")+
+  theme_minimal()+
+  labs(x = "NM index", y = "Lineage index", title = "Indeterminacy of NMPs")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text = element_text(size = 15, family = "sans"))+
+  stat_cor(method = "pearson", label.x = -1, label.y = 0.6)
 p_nmp_lineage
+
+#calculate pearsons coefficient
+# use options(scipen=0) to force different scientific notation
+PCC <- cor.test(df_combined$nm_index, df_combined$lineage_index, method = "pearson", exact = T, conf.level = 0.95)
+
+PCC
+PCC$estimate
+PCC$conf.int[c(1,2)]
+PCC$p.value
+
