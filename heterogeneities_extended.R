@@ -62,13 +62,18 @@ df_combined_18 <- my_csv_files_proc_merged_18 %>%
 #View(df_combined_18)
 
 p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
-p1_18 <- p_18 + scale_x_continuous(name="NMindex", limits=c(-1, 1))+theme(text=element_text(size = 15, family = "sans"))
-p2_18 <- p1_18 +scale_fill_manual(values=plasma(n=length(my_csv_files_18))) + theme_minimal()
-p3_18 <- p2_18 + ggtitle("18 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))+
+p1_18 <- p_18 + scale_x_continuous( limits=c(-1, 1))+theme(text=element_text(size = 15, family = "sans"))
+p2_18 <- p1_18 +scale_fill_manual(values=viridis(n=length(my_csv_files_18))) + theme_minimal() + labs(x="NM index", y="Number of Cells")
+p3_18 <- p2_18 + ggtitle("18 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
 p3_18
 
 line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
-  geom_density(colour = "darkred") + theme_minimal()+ ggtitle("18 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
+  geom_density(colour = "darkslateblue") +
+  theme_classic2()+ 
+  ggtitle("18 somite stage")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text=element_text(size = 15, family = "sans"))+
+  labs(x="NM index", y="Density")
 line_18
 
 
@@ -379,13 +384,12 @@ ggarrange(line_18, line_21  + rremove("ylab"), line_24 + rremove("ylab"), line_2
 compare_lines <- ggplot(df_combined_final, aes(x=nm_index, y=, colour=ssnumber))+
   geom_density(size=2) +
   #]theme(panel.background = element_rect(fill = "black")) + 
-  ggtitle("Comparison of all somite stages") +
-  theme(plot.title = element_text(hjust = 0.75))+
+  labs(x="NM index", y="Density", title = "Comparison across all somite stages") +
+  theme(plot.title = element_text(hjust = 0.5))+
   theme_minimal()+
   theme(text=element_text(size = 15, family = "sans"))+
-  scale_color_viridis_d(labels=c("18", "21", "24", "26-28", "30"))+
-  guides(colour=guide_legend(title="Somite stage"))+
-  labs(x="NM index", y="Density")
+  scale_color_viridis_d(labels=c("18", "21", "24", "26-28", "30"), option = "D")+
+  guides(colour=guide_legend(title="Somite stage"))
 
 compare_lines
 
