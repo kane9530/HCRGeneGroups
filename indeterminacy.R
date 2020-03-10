@@ -94,22 +94,23 @@ df_combined <- merge(df_combined_a, df_combined_b, by = c("cell_ID", "sample_ID"
   mutate(lineage_index = .[[10]]-.[[11]])
 
 df_combined_remove <- df_combined %>% 
-filter(!sample_ID==3)
+filter(!sample_ID==3) %>% 
+filter(!sample_ID==1)
 
 df_combined$sample_ID <- as.factor(df_combined$sample_ID)
 
 
-p_nmps_only_s3_r <- ggplot(df_combined_remove, aes(x=nm_index, fill = factor(sample_ID)))+
+p_nmps_only_s3_s1_r <- ggplot(df_combined_remove, aes(x=nm_index, fill = factor(sample_ID)))+
   geom_histogram(binwidth = 0.2, color="black")+
   scale_x_continuous(name = "NMindex",limits=c(-1, 1))+
   theme_minimal()+
   scale_fill_manual(values=plasma(n=length(my_csv_files_cdh_hes)))+
   theme(text = element_text(size = 15, family = "sans"))+
-  ggtitle("NMP distribution with no sample 3")+
+  ggtitle("NMP distribution with no sample 3 or sample 1")+
  # theme(legend.position = "none")+
   theme(plot.title = element_text(hjust = 0.5))
 
-p_nmps_only_s3_r
+p_nmps_only_s3_s1_r
 #plotting
 
 p_nmps_only <- ggplot(df_combined, aes(x=nm_index, fill = factor(sample_ID)))+
@@ -132,6 +133,7 @@ line_nmps_only <- ggplot(df_combined, aes(x=nm_index, y=))+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(text = element_text(size = 15, family = "sans"))
 
+line_nmps_only
 # plotting the lineage marker index
 p_lineage_only <- ggplot(df_combined, aes(x=lineage_index, fill = factor(sample_ID)))+
   geom_histogram(binwidth = 0.2, color="black")+
@@ -163,7 +165,9 @@ p_nmp_lineage <- ggplot(df_combined, aes(x=nm_index, y=lineage_index, color = fa
   labs(x = "NM index", y = "Lineage index", title = "Indeterminacy of NMPs")+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(text = element_text(size = 15, family = "sans"))+
-  stat_cor(method = "pearson")
+  stat_cor(method = "pearson")+
+  scale_colour_viridis_d(direction = -1)+
+  guides(colour=guide_legend(title="Sample no."))
 p_nmp_lineage
 
 #calculate pearsons coefficient
