@@ -6,6 +6,7 @@ library(stringr)
 library(qdapRegex)
 library(viridis)
 library(ggpubr)
+library(extrafont)
 # 18ss
 processcsv18 <- function(my_df, gene_names, my_sample_no_18){
   my_df$sample_ID = my_sample_no_18
@@ -16,7 +17,7 @@ processcsv18 <- function(my_df, gene_names, my_sample_no_18){
   return (csv)
 }
 
-dir18ss <- list.dirs(path = "./newdataCsv/18ss")[-1]
+dir18ss <- list.dirs(path = "./dataCsv/18ss")[-1]
 
 my_dir18ss_csv<- dir18ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -61,13 +62,18 @@ df_combined_18 <- my_csv_files_proc_merged_18 %>%
 #View(df_combined_18)
 
 p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
-p1_18 <- p_18 + scale_x_continuous(name="NMindex", limits=c(-1, 1))
-p2_18 <- p1_18 +scale_fill_manual(values=plasma(n=length(my_csv_files_18))) + theme_minimal()
+p1_18 <- p_18 + scale_x_continuous( limits=c(-1, 1))+theme(text=element_text(size = 15, family = "sans"))
+p2_18 <- p1_18 +scale_fill_manual(values=viridis(n=length(my_csv_files_18))) + theme_minimal() + labs(x="NM index", y="Number of Cells")
 p3_18 <- p2_18 + ggtitle("18 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
 p3_18
 
 line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
-  geom_density(colour = "darkred") + theme_minimal()+ ggtitle("18 somite stage")+theme(plot.title = element_text(hjust = 0.5))
+  geom_density(colour = "darkslateblue") +
+  theme_classic2()+ 
+  ggtitle("18 somite stage")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text=element_text(size = 15, family = "sans"))+
+  labs(x="NM index", y="Density")
 line_18
 
 
@@ -81,7 +87,7 @@ processcsv21 <- function(my_df, gene_names, my_sample_no_21){
   return (csv)
 }
 
-dir21ss <- list.dirs(path = "./newdataCsv/21ss")[-1]
+dir21ss <- list.dirs(path = "./dataCsv/21ss")[-1]
 
 my_dir21ss_csv<- dir21ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -127,12 +133,12 @@ df_combined_21 <- my_csv_files_proc_merged_21 %>%
 
 p_21 <- ggplot(df_combined_21, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
 p1_21 <- p_21 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
-p2_21 <- p1_21 +scale_fill_manual(values=plasma(n=length(my_csv_files_21)))
+p2_21 <- p1_21 +scale_fill_manual(values=plasma(n=length(my_csv_files_21)))+theme(text=element_text(size = 15, family = "sans"))
 p3_21 <- p2_21 + ggtitle("21 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
 p3_21
 
 line_21 <- ggplot(df_combined_21, aes(x=nm_index))+
-  geom_density(colour = "orange")+ theme_minimal()+ ggtitle("21 somite stage")+theme(plot.title = element_text(hjust = 0.5))
+  geom_density(colour = "orange")+ theme_minimal()+ ggtitle("21 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
 line_21
 
 # 24ss 
@@ -146,7 +152,7 @@ processcsv24 <- function(my_df, gene_names, my_sample_no_24){
   return (csv)
 }
 
-dir24ss <- list.dirs(path = "./newdataCsv/24ss")[-1]
+dir24ss <- list.dirs(path = "./dataCsv/24ss")[-1]
 
 my_dir24ss_csv<- dir24ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -193,12 +199,12 @@ df_combined_24 <- my_csv_files_proc_merged_24 %>%
 
 p_24 <- ggplot(df_combined_24, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
 p1_24 <- p_24 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
-p2_24 <- p1_24 +scale_fill_manual(values=plasma(n=length(my_csv_files_24)))
+p2_24 <- p1_24 +scale_fill_manual(values=plasma(n=length(my_csv_files_24)))+theme(text=element_text(size = 15, family = "sans"))
 p3_24 <- p2_24 + ggtitle("24 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
 p3_24
 
 line_24 <- ggplot(df_combined_24, aes(x=nm_index))+
-  geom_density(colour = "gold")+ theme_minimal()+ ggtitle("24 somite stage")+theme(plot.title = element_text(hjust = 0.5))
+  geom_density(colour = "gold")+ theme_minimal()+ ggtitle("24 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
 line_24
 # 26-28ss
 processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
@@ -210,7 +216,7 @@ processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
   return (csv)
 }
 
-dir2628ss <- list.dirs(path = "./newdataCsv/26-28ss")[-1]
+dir2628ss <- list.dirs(path = "./dataCsv/26-28ss")[-1]
 
 my_dir2628ss_csv<- dir2628ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -256,12 +262,12 @@ df_combined_2628ss <- my_csv_files_proc_merged_2628ss %>%
 
 p_2628 <- ggplot(df_combined_2628ss, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
 p1_2628 <- p_2628 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
-p2_2628 <- p1_2628 +scale_fill_manual(values=plasma(n=length(my_csv_files_2628ss)))
+p2_2628 <- p1_2628 +scale_fill_manual(values=plasma(n=length(my_csv_files_2628ss)))+theme(text=element_text(size = 15, family = "sans"))
 p3_2628 <- p2_2628 + ggtitle("26-28 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
 p3_2628
 
 line_2628ss <- ggplot(df_combined_2628ss, aes(x=nm_index))+
-  geom_density(colour = "green")+ theme_minimal()+ ggtitle("26-28 somite stage")+theme(plot.title = element_text(hjust = 0.5))
+  geom_density(colour = "green")+ theme_minimal()+ ggtitle("26-28 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
 
 line_2628ss
 # 30ss
@@ -275,7 +281,7 @@ processcsv30ss <- function(my_df, gene_names, my_sample_no_30ss){
   return (csv)
 }
 
-dir30ss <- list.dirs(path = "./newdataCsv/30ss")[-1]
+dir30ss <- list.dirs(path = "./dataCsv/30ss")[-1]
 
 my_dir30ss_csv<- dir30ss %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -321,30 +327,45 @@ df_combined_30ss <- my_csv_files_proc_merged_30ss %>%
 
 p_30 <- ggplot(df_combined_30ss, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
 p1_30 <- p_30 + scale_x_continuous(name="NMindex", limits=c(-1, 1)) + theme_minimal()
-p2_30 <- p1_30 +scale_fill_manual(values=plasma(n=length(my_csv_files_2628ss)))
+p2_30 <- p1_30 +scale_fill_manual(values=plasma(n=length(my_csv_files_2628ss)))+theme(text=element_text(size = 15, family = "sans"))
 p3_30 <- p2_30 + ggtitle("30 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
 p3_30
 
 line_30ss <- ggplot(df_combined_30ss, aes(x=nm_index, y=))+
-  geom_density(colour = "blue")+ theme_minimal()+ ggtitle("30 somite stage")+theme(plot.title = element_text(hjust = 0.5))
+  geom_density(colour = "blue")+ theme_minimal()+ ggtitle("30 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
 line_30ss
 
 # combine dataframes
 
 df_final_18 <- df_combined_18 %>% 
-  add_column(somite_stage = somitestages[1])
+  add_column(somite_stage = somitestages[1]) %>% 
+  add_column(ssnumber = 1)
+
+df_final_18$ssnumber <- factor(df_final_18$ssnumber)
 
 df_final_21 <- df_combined_21 %>% 
-  add_column(somite_stage = somitestages[2])
+  add_column(somite_stage = somitestages[2])%>% 
+  add_column(ssnumber = 2)
+
+df_final_21$ssnumber <- factor(df_final_21$ssnumber)
 
 df_final_24 <- df_combined_24 %>% 
-  add_column(somite_stage = somitestages[3])
+  add_column(somite_stage = somitestages[3])%>% 
+  add_column(ssnumber = 3)
+
+df_final_24$ssnumber <- factor(df_final_24$ssnumber)
 
 df_final_2628 <- df_combined_2628ss %>% 
-  add_column(somite_stage = somitestages[4])
+  add_column(somite_stage = somitestages[4])%>% 
+  add_column(ssnumber = 4)
+
+df_final_2628$ssnumber <- factor(df_final_2628$ssnumber)
 
 df_final_30 <- df_combined_30ss %>% 
-  add_column(somite_stage = somitestages[5])
+  add_column(somite_stage = somitestages[5])%>% 
+  add_column(ssnumber = 5)
+
+df_final_30$ssnumber <- factor(df_final_30$ssnumber)
 
 df_combined_final <- df_final_18 %>% 
   rbind(df_final_21) %>% 
@@ -360,15 +381,29 @@ ggarrange(p3_18, p3_21 + rremove("ylab"), p3_24 + rremove("ylab"), p3_2628 + rre
 ggarrange(line_18, line_21  + rremove("ylab"), line_24 + rremove("ylab"), line_2628ss + rremove("ylab"), line_30ss + rremove("ylab"), 
           ncol = 5, nrow = 1)
 
+compare_lines <- ggplot(df_combined_final, aes(x=nm_index, y=, colour=ssnumber))+
+  geom_density(size=2) +
+  #]theme(panel.background = element_rect(fill = "black")) + 
+  labs(x="NM index", y="Density", title = "Comparison across all somite stages") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_minimal()+
+  theme(text=element_text(size = 15, family = "sans"))+
+  scale_color_viridis_d(labels=c("18", "21", "24", "26-28", "30"), option = "D")+
+  guides(colour=guide_legend(title="Somite stage"))
+
+compare_lines
+
 #and then something with plyrs join(), actually maybe rowbind
 #but first, for each one, use addcolumn 
-files_somitestages <- list.dirs(path="./newdataCsv", recursive = FALSE)
-somitestages <- basename(files_somitestages)
+files_somitestages <- list.dirs(path="./dataCsv", recursive = T)
+somite_s18 <- str_detect(files_somitestages, pattern = "18ss")
+somitestages <- basename(files_somitestages)# %>% 
+  #str_detect(pattern = "ss")
 directory <- as.character()
 
 
 for ( i in 1:length(somitestages)){
-  directory <- list.dirs(path = "./newdataCsv")
+  directory <- list.dirs(path = "./dataCsv")
   mydirectory <- directory[i+1]%>% 
-    map(~list.(path = ., pattern="\\.csv$", full.names = TRUE))
+    map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE))
 }
