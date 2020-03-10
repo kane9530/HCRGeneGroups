@@ -61,18 +61,24 @@ df_combined_18 <- my_csv_files_proc_merged_18 %>%
 
 #View(df_combined_18)
 
-p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID))) + geom_histogram(binwidth=0.2, color = 'black') 
-p1_18 <- p_18 + scale_x_continuous( limits=c(-1, 1))+theme(text=element_text(size = 15, family = "sans"))
-p2_18 <- p1_18 +scale_fill_manual(values=viridis(n=length(my_csv_files_18))) + theme_minimal() + labs(x="NM index", y="Number of Cells")
-p3_18 <- p2_18 + ggtitle("18 somite stage") + theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
-p3_18
+p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID)))+
+  geom_histogram(binwidth=0.2, color = 'black')+
+  scale_x_continuous( limits=c(-1, 1))+
+  theme(text=element_text(size = 30, family = "sans"))+
+  scale_fill_manual(values=viridis(n=length(my_csv_files_18)))+
+  theme_minimal() + 
+  labs(x="NM index", y="Number of Cells")+
+  ggtitle("18 somite stage") + 
+  theme(plot.title = element_text(hjust = 0.5))+
+  guides(fill=guide_legend(title="Sample no."))
+p_18
 
 line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
   geom_density(colour = "darkslateblue") +
   theme_classic2()+ 
   ggtitle("18 somite stage")+
   theme(plot.title = element_text(hjust = 0.5))+
-  theme(text=element_text(size = 15, family = "sans"))+
+  theme(text=element_text(size = 13, family = "sans"))+
   labs(x="NM index", y="Density")
 line_18
 
