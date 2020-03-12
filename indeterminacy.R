@@ -189,3 +189,9 @@ PCC_sample_1 <- cor.test(df_only_sample_1$nm_index, df_only_sample_1$lineage_ind
 PCC_sample_1
 #The same significance value seen here as in the ggplot, so they must use the same method
 #?cor.test tells you what it does for a PCC
+
+#####Plotting the amount of NMPs vs NMPS co-expressing Cdh6 and Hes6#####
+
+
+
+

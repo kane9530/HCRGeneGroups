@@ -381,7 +381,7 @@ df_combined_final <- df_final_18 %>%
 
 # combine/compare graphs 
 
-ggarrange(p3_18, p3_21 + rremove("ylab"), p3_24 + rremove("ylab"), p3_2628 + rremove("ylab"), p3_30 + rremove("ylab"),
+ggarrange(p_18, p3_21 + rremove("ylab"), p3_24 + rremove("ylab"), p3_2628 + rremove("ylab"), p3_30 + rremove("ylab"),
           ncol = 5, nrow = 1)
 
 ggarrange(line_18, line_21  + rremove("ylab"), line_24 + rremove("ylab"), line_2628ss + rremove("ylab"), line_30ss + rremove("ylab"), 
@@ -413,3 +413,41 @@ for ( i in 1:length(somitestages)){
   mydirectory <- directory[i+1]%>% 
     map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE))
 }
+
+##### Trying to plot just heterogeneity######
+nmp_sox2 <- ggplot(data = df_combined_final, mapping = aes(x=sox2))+
+  geom_density()
+
+nmp_sox2
+
+nmp_sox2_norm <- ggplot(data = df_combined_final, mapping = aes(x=sox2_normalise))+
+  geom_density()
+
+nmp_sox2_norm
+
+nmp_tbxta <- ggplot(data = df_combined_final, mapping = aes(x=tbxta))+
+  geom_density()
+
+nmp_tbxta
+
+nmp_tbxta_norm <- ggplot(data = df_combined_final, mapping = aes(x=tbxta_normalise))+
+  geom_density()
+
+nmp_tbxta_norm
+
+nmp_sox2_tbxta <- ggplot(data = df_combined_final, mapping = aes())+
+  geom_density(aes(x=sox2), colour="blue")+
+  geom_density(aes(x=tbxta), colour="red")
+
+nmp_sox2_tbxta
+
+nmp_sox2_tbxta_norm <- ggplot(data = df_combined_final)+
+  geom_density(aes(x=sox2_normalise, colour = "Sox2"), size = 3)+
+  geom_density(aes(x=tbxta_normalise, colour = "Tbxta"), size = 3)+
+  xlab("Normalised intensity values")+
+  scale_colour_manual("", breaks = c("Sox2", "Tbxta"),
+                      values = c("red", "blue"))+
+  theme_minimal()
+nmp_sox2_tbxta_norm
+
+##### Trying to justify the heterogeneity of NMPs vs noto and neural tube ######
