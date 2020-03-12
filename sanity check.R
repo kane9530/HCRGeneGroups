@@ -229,3 +229,7 @@ numbers_of_nmps_vs_co_nmps <-  ggplot(merged_df_nmps, aes(x=id, y=, fill = facto
   theme_minimal()+
   guides(fill=guide_legend(title="Type of cell"))
 numbers_of_nmps_vs_co_nmps
+
+##Kane asked for a breakdown of what constitutes the indeterminates.
+
+further_breakdown
