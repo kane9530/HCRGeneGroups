@@ -172,6 +172,7 @@ p_nmp_lineage
 
 #calculate pearsons coefficient
 # use options(scipen=0) to force different scientific notation
+
 PCC <- cor.test(df_combined$nm_index, df_combined$lineage_index, method = "pearson", exact = T, conf.level = 0.95)
 
 PCC
@@ -179,3 +180,12 @@ PCC$estimate
 PCC$conf.int[c(1,2)]
 PCC$p.value
 
+#testing out each sample's PCC
+df_only_sample_1 <- df_combined %>% 
+  filter(sample_ID==1)
+
+PCC_sample_1 <- cor.test(df_only_sample_1$nm_index, df_only_sample_1$lineage_index, method = "pearson", exact = T, conf.level = 0.95)
+
+PCC_sample_1
+#The same significance value seen here as in the ggplot, so they must use the same method
+#?cor.test tells you what it does for a PCC
