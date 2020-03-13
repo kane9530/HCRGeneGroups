@@ -240,4 +240,18 @@ further_breakdown
 # List the Cell ID and Sample ID
 #filter
 
+max_cells <- merged_df_nmps %>% 
+  filter(sox2_normalise=="1"|tbxta_normalise=="1")
+
+max_cells_sox2 <- max_cells %>% 
+  arrange(sox2_normalise) %>%
+  select(cell_ID, sample_ID, sox2_normalise)
+
+max_cells_tbxta <- max_cells %>% 
+  arrange(tbxta_normalise) %>% 
+  select(cell_ID, sample_ID, tbxta_normalise)
+  
+
+
+
 
