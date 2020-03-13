@@ -233,3 +233,11 @@ numbers_of_nmps_vs_co_nmps
 ##Kane asked for a breakdown of what constitutes the indeterminates.
 
 further_breakdown
+
+## Find the maximum cdh6 and maximum hes6's 
+# Find maximum of sox2_normalise and tbxta_normalise
+# Ask Kane for an appropriate threshold
+# List the Cell ID and Sample ID
+#filter
+
+
