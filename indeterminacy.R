@@ -22,7 +22,7 @@ processcsv_hes_cdh <- function(my_df, gene_names, my_sample_hes_cdh){
 #navigating to the right cdh6 hes6 folder
 
 
-dir_hes_cdh <- list.dirs(path = "./dataCsv/hes6_cdh6")[-1]
+dir_hes_cdh <- list.dirs(path = "./dataCsv/new_hes6_cdh6")[-1]
 
 my_hes_cdh_csv<- dir_hes_cdh %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -41,36 +41,48 @@ gene_names = c("sox2", "tbxta","cdh6","hes6")
 
 my_csv_files_cdh_hes <- lapply(my_hes_cdh_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
 
-#merge sox2 and tbxta
+#merge cdh6 and hes6
 my_csv_files_proc_hes_cdh_a <- vector("list", length = length(my_csv_files_cdh_hes))
 my_csv_files_proc_merged_hes_cdh_a <- vector("list", length = length(my_csv_files_cdh_hes))
 
 for (i in 1:length(my_csv_files_cdh_hes)){
   for (j in 1:length(gene_names)){
     my_csv_processed_cdh_hes_a <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[j]], 
-                                        gene_names = gene_names[j],
+                                        gene_names = gene_names[j+2],
                                         my_sample_hes_cdh = my_sample_hes_cdh[i])
     my_csv_files_proc_hes_cdh_a[[i]][[j]] <- my_csv_processed_cdh_hes_a
   }
   my_csv_files_proc_merged_hes_cdh_a[[i]] <- merge(my_csv_files_proc_hes_cdh_a[[i]][[1]], my_csv_files_proc_hes_cdh_a[[i]][[2]], by = c("cell_ID", "sample_ID"))
   
 }
-# merge cdh5 and hes6
+# process sox2
 my_csv_files_proc_hes_cdh_b <- vector("list", length = length(my_csv_files_cdh_hes))
 my_csv_files_proc_merged_hes_cdh_b <- vector("list", length = length(my_csv_files_cdh_hes))
 
 for (i in 1:length(my_csv_files_cdh_hes)){
   for (j in 1:length(gene_names)){
-    my_csv_processed_cdh_hes_b <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[j]], 
-                                                     gene_names = gene_names[j+2],
+    my_csv_processed_cdh_hes_b <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[4]], 
+                                                     gene_names = gene_names[1],
                                                      my_sample_hes_cdh = my_sample_hes_cdh[i])
     my_csv_files_proc_hes_cdh_b[[i]][[j]] <- my_csv_processed_cdh_hes_b
   }
-  my_csv_files_proc_merged_hes_cdh_b[[i]] <- merge(my_csv_files_proc_hes_cdh_b[[i]][[1]], my_csv_files_proc_hes_cdh_b[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  my_csv_files_proc_merged_hes_cdh_b[[i]] <- my_csv_files_proc_hes_cdh_b[[i]][[1]]
 }
 
+#process tbxta
+my_csv_files_proc_hes_cdh_c <- vector("list", length = length(my_csv_files_cdh_hes))
+my_csv_files_proc_merged_hes_cdh_c <- vector("list", length = length(my_csv_files_cdh_hes))
 
-#my_csv_files_proc_merged_hes_cdh <- vector("list", length = length(my_csv_files_cdh_hes))
+for (i in 1:length(my_csv_files_cdh_hes)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_cdh_hes_c <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[5]], 
+                                                     gene_names = gene_names[2],
+                                                     my_sample_hes_cdh = my_sample_hes_cdh[i])
+    my_csv_files_proc_hes_cdh_c[[i]][[j]] <- my_csv_processed_cdh_hes_c
+  }
+  my_csv_files_proc_merged_hes_cdh_c[[i]] <- my_csv_files_proc_hes_cdh_c[[i]][[1]]
+}
+
 
 
 df_combined_a <- my_csv_files_proc_merged_hes_cdh_a %>%
@@ -79,7 +91,7 @@ df_combined_a <- my_csv_files_proc_merged_hes_cdh_a %>%
   arrange(sample_ID, cell_ID) %>%
   mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
   ungroup()%>%
-  mutate(nm_index = .[[5]]-.[[6]])
+  mutate(lineage_index = .[[5]]-.[[6]])
 
 
 df_combined_b <- my_csv_files_proc_merged_hes_cdh_b %>%
@@ -87,11 +99,18 @@ df_combined_b <- my_csv_files_proc_merged_hes_cdh_b %>%
   group_by(sample_ID) %>%
   arrange(sample_ID, cell_ID) 
   
+df_combined_c <- my_csv_files_proc_merged_hes_cdh_c %>%
+  reduce(rbind) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) 
 
 df_combined <- merge(df_combined_a, df_combined_b, by = c("cell_ID", "sample_ID")) %>% 
+  merge(df_combined_c, by = c("cell_ID", "sample_ID")) %>% 
+  group_by(sample_ID) %>%
   mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 8:9) %>%
-  ungroup()%>%
-  mutate(lineage_index = .[[10]]-.[[11]])
+  ungroup() %>% 
+  mutate(nm_index = .[[10]]-.[[11]])
+
 
 df_combined_remove <- df_combined %>% 
 filter(!sample_ID==3) %>% 
@@ -169,6 +188,17 @@ p_nmp_lineage <- ggplot(df_combined, aes(x=nm_index, y=lineage_index, color = fa
   scale_colour_viridis_d(direction = -1)+
   guides(colour=guide_legend(title="Sample no."))
 p_nmp_lineage
+
+p_nmp_lineage_group <- ggplot(df_combined, aes(x=nm_index, y=lineage_index))+
+  geom_point()+
+  geom_smooth(method = "lm", color="navy", fill="lightblue")+
+  theme_minimal()+
+  labs(x = "NM index", y = "Lineage index", title = "Indeterminacy of NMPs")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text = element_text(size = 15, family = "sans"))+
+  stat_cor(method = "pearson")
+
+p_nmp_lineage_group
 
 #calculate pearsons coefficient
 # use options(scipen=0) to force different scientific notation

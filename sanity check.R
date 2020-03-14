@@ -62,6 +62,34 @@ df_combined_18 <- my_csv_files_proc_merged_18 %>%
   ungroup()%>%
   mutate(nm_index = .[[5]]-.[[6]])
 
+##### What on earth is going on with the normalisations in samples?#####
+df_normalised_1 <- my_csv_files_proc_merged_18 %>% 
+  reduce(rbind) %>%
+  arrange(sample_ID, cell_ID)
+
+df_normalised_2 <- df_normalised_1 %>% 
+  group_by(sample_ID) %>%
+  mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
+  ungroup()%>%
+  mutate(nm_index = .[[5]]-.[[6]])
+
+df_normalised_2_s_1 <- df_normalised_2 %>%
+  filter(sample_ID==1)
+
+checking_again_sample_1 <- ggplot(df_normalised_2_s_1, mapping = aes(x=nm_index))+
+  geom_histogram()
+
+checking_again_sample_1
+
+df_combined_18_s_1 <- df_combined_18 %>% 
+  filter(sample_ID==1)
+
+
+checking_sample_1 <- ggplot(df_combined_18_s_1, mapping = aes(x=sox2_normalise))+
+  geom_histogram()
+checking_sample_1
+
+
 #Looking at specifically hes6 and cdh6 datasets of nmps
 
 df_combine_18_hes6_cdh6_only <- df_combined_18 %>% 
@@ -106,7 +134,7 @@ processcsv_hes_cdh <- function(my_df, gene_names, my_sample_hes_cdh){
 #navigating to the right cdh6 hes6 folder
 
 
-dir_hes_cdh <- list.dirs(path = "./dataCsv/hes6_cdh6")[-1]
+dir_hes_cdh <- list.dirs(path = "./dataCsv/new_hes6_cdh6")[-1]
 
 my_hes_cdh_csv<- dir_hes_cdh %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -125,33 +153,48 @@ gene_names = c("sox2", "tbxta","cdh6","hes6")
 
 my_csv_files_cdh_hes <- lapply(my_hes_cdh_csv, function(x){ lapply(x, FUN = read.csv, header = TRUE, skip = 3)}) 
 
-#merge sox2 and tbxta
+#merge cdh6 and hes6
 my_csv_files_proc_hes_cdh_a <- vector("list", length = length(my_csv_files_cdh_hes))
 my_csv_files_proc_merged_hes_cdh_a <- vector("list", length = length(my_csv_files_cdh_hes))
 
 for (i in 1:length(my_csv_files_cdh_hes)){
   for (j in 1:length(gene_names)){
     my_csv_processed_cdh_hes_a <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[j]], 
-                                                     gene_names = gene_names[j],
+                                                     gene_names = gene_names[j+2],
                                                      my_sample_hes_cdh = my_sample_hes_cdh[i])
     my_csv_files_proc_hes_cdh_a[[i]][[j]] <- my_csv_processed_cdh_hes_a
   }
   my_csv_files_proc_merged_hes_cdh_a[[i]] <- merge(my_csv_files_proc_hes_cdh_a[[i]][[1]], my_csv_files_proc_hes_cdh_a[[i]][[2]], by = c("cell_ID", "sample_ID"))
   
 }
-# merge cdh5 and hes6
+# process sox2
 my_csv_files_proc_hes_cdh_b <- vector("list", length = length(my_csv_files_cdh_hes))
 my_csv_files_proc_merged_hes_cdh_b <- vector("list", length = length(my_csv_files_cdh_hes))
 
 for (i in 1:length(my_csv_files_cdh_hes)){
   for (j in 1:length(gene_names)){
-    my_csv_processed_cdh_hes_b <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[j]], 
-                                                     gene_names = gene_names[j+2],
+    my_csv_processed_cdh_hes_b <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[4]], 
+                                                     gene_names = gene_names[1],
                                                      my_sample_hes_cdh = my_sample_hes_cdh[i])
     my_csv_files_proc_hes_cdh_b[[i]][[j]] <- my_csv_processed_cdh_hes_b
   }
-  my_csv_files_proc_merged_hes_cdh_b[[i]] <- merge(my_csv_files_proc_hes_cdh_b[[i]][[1]], my_csv_files_proc_hes_cdh_b[[i]][[2]], by = c("cell_ID", "sample_ID"))
+  my_csv_files_proc_merged_hes_cdh_b[[i]] <- my_csv_files_proc_hes_cdh_b[[i]][[1]]
 }
+
+#process tbxta
+my_csv_files_proc_hes_cdh_c <- vector("list", length = length(my_csv_files_cdh_hes))
+my_csv_files_proc_merged_hes_cdh_c <- vector("list", length = length(my_csv_files_cdh_hes))
+
+for (i in 1:length(my_csv_files_cdh_hes)){
+  for (j in 1:length(gene_names)){
+    my_csv_processed_cdh_hes_c <- processcsv_hes_cdh(my_df = my_csv_files_cdh_hes[[i]][[5]], 
+                                                     gene_names = gene_names[2],
+                                                     my_sample_hes_cdh = my_sample_hes_cdh[i])
+    my_csv_files_proc_hes_cdh_c[[i]][[j]] <- my_csv_processed_cdh_hes_c
+  }
+  my_csv_files_proc_merged_hes_cdh_c[[i]] <- my_csv_files_proc_hes_cdh_c[[i]][[1]]
+}
+
 
 
 df_combined_a <- my_csv_files_proc_merged_hes_cdh_a %>%
@@ -160,7 +203,7 @@ df_combined_a <- my_csv_files_proc_merged_hes_cdh_a %>%
   arrange(sample_ID, cell_ID) %>%
   mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 3:4) %>%
   ungroup()%>%
-  mutate(nm_index = .[[5]]-.[[6]])
+  mutate(lineage_index = .[[5]]-.[[6]])
 
 
 df_combined_b <- my_csv_files_proc_merged_hes_cdh_b %>%
@@ -168,14 +211,19 @@ df_combined_b <- my_csv_files_proc_merged_hes_cdh_b %>%
   group_by(sample_ID) %>%
   arrange(sample_ID, cell_ID) 
 
+df_combined_c <- my_csv_files_proc_merged_hes_cdh_c %>%
+  reduce(rbind) %>%
+  group_by(sample_ID) %>%
+  arrange(sample_ID, cell_ID) 
 
 df_combined <- merge(df_combined_a, df_combined_b, by = c("cell_ID", "sample_ID")) %>% 
+  merge(df_combined_c, by = c("cell_ID", "sample_ID")) %>% 
+  group_by(sample_ID) %>%
   mutate_at(.funs = list(normalise = ~((.-min(.))/max(.-min(.)))), .vars = 8:9) %>%
-  ungroup()%>%
-  mutate(lineage_index = .[[10]]-.[[11]])
+  ungroup() %>% 
+  mutate(nm_index = .[[10]]-.[[11]])
 
 
-df_combined$sample_ID <- as.factor(df_combined$sample_ID)
 # Plots of NMPs that co-express Cdh6 and Hes6
 
 
@@ -185,7 +233,7 @@ p_nmps_co_only <- ggplot(df_combined, aes(x=nm_index, fill = factor(sample_ID)))
   theme_minimal()+
   scale_fill_manual(values=plasma(n=length(my_csv_files_cdh_hes)))+
   theme(text = element_text(size = 15, family = "sans"))+
-  ggtitle("NMP distribution")+
+  ggtitle("NMP_All_4")+
   #theme(legend.position = "none")+
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -195,7 +243,7 @@ p_nmps_co_only
 line_nmps_co_only <- ggplot(df_combined, aes(x=nm_index, y=))+
   geom_density(colour = "red")+
   theme_minimal()+
-  ggtitle("NMP distribution")+
+  ggtitle("NMP_All_4")+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(text = element_text(size = 15, family = "sans"))
 
@@ -203,13 +251,15 @@ line_nmps_co_only
 
 ##Time to plot the number of NMPs vs the number of NMPS coexpressing Cdh6 and Hes6
 #Will need to merge dataframes
+df_combined$sample_ID <- as.factor(df_combined$sample_ID)
+df_combine_18_hes6_cdh6_only$sample_ID <- as.factor(df_combine_18_hes6_cdh6_only$sample_ID)
 
 merged_df_nmps <- df_combine_18_hes6_cdh6_only %>% 
   bind_rows(df_combined, .id = "id")
 
 merged_df_nmps$id <- gsub('1','NMPs', merged_df_nmps$id)
 
-merged_df_nmps$id <- gsub('2','Indeterminates',merged_df_nmps$id)
+merged_df_nmps$id <- gsub('2','All-4s',merged_df_nmps$id)
 
 merged_df_nmps$id <- as.factor(merged_df_nmps$id)
 ##Plotting time
@@ -241,17 +291,37 @@ further_breakdown
 #filter
 
 max_cells <- merged_df_nmps %>% 
-  filter(sox2_normalise=="1"|tbxta_normalise=="1")
+  filter(cdh6_normalise>"0.9"|hes6_normalise>"0.9")
 
-max_cells_sox2 <- max_cells %>% 
-  arrange(sox2_normalise) %>%
-  select(cell_ID, sample_ID, sox2_normalise)
+max_cells_cdh6 <- max_cells %>% 
+  arrange(cdh6_normalise) %>%
+  select(cell_ID, sample_ID, cdh6_normalise)
 
-max_cells_tbxta <- max_cells %>% 
-  arrange(tbxta_normalise) %>% 
-  select(cell_ID, sample_ID, tbxta_normalise)
+max_cells_hes6 <- max_cells %>% 
+  arrange(hes6_normalise) %>% 
+  select(cell_ID, sample_ID, hes6_normalise)
   
+##Look at distribution of just the cdh6 and hes6 intensities
 
+cdh6_dist <- ggplot(merged_df_nmps, mapping = aes(x=cdh6_normalise))+
+  geom_density()+
+  theme_minimal()
+cdh6_dist
 
+cdh6_dist_hist <- ggplot(merged_df_nmps, mapping = aes(x=cdh6_normalise))+
+  geom_histogram()+
+  theme_minimal()
+cdh6_dist_hist
+
+hes6_dist <- ggplot(merged_df_nmps, mapping = aes(x=hes6_normalise))+
+  geom_density()+
+  theme_minimal()
+hes6_dist
+
+hes6_dist_hist <- ggplot(merged_df_nmps, mapping = aes(x=hes6_normalise))+
+  geom_histogram()+
+  theme_minimal()
+hes6_dist_hist
+##Which threshold?
 
 
