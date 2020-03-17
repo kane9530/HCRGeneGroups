@@ -269,7 +269,8 @@ merged_df_nmps$id <- as.factor(merged_df_nmps$id)
 nmps_and_co_nmps <- ggplot(merged_df_nmps, aes(x=nm_index, y=, colour = factor(id)))+
   geom_density(size=2)+
   guides(colour=guide_legend(title="Type of cell"))+
-  theme_minimal()
+  theme_minimal()+
+  scale_colour_manual(values = viridis(n=2, begin = 0, end = 0.5))
 
 nmps_and_co_nmps
 
@@ -277,7 +278,8 @@ numbers_of_nmps_vs_co_nmps <-  ggplot(merged_df_nmps, aes(x=id, y=, fill = facto
   geom_bar()+
   ggtitle("Number of NMPs vs number of All-4's")+
   theme_minimal()+
-  guides(fill=guide_legend(title="Type of cell"))
+  guides(fill=guide_legend(title="Type of cell"))+
+  scale_fill_manual(values = viridis(n=2, begin = 0, end = 0.5))
 numbers_of_nmps_vs_co_nmps
 
 ##Kane asked for a breakdown of what constitutes the indeterminates.
