@@ -1,12 +1,16 @@
-
 library(plyr)
 library(dplyr)
 library(tidyverse)
+library(tidyselect)
 library(stringr)
 library(qdapRegex)
 library(viridis)
 library(ggpubr)
 library(extrafont)
+library(ggridges)
+library(RColorBrewer)
+
+
 # 18ss
 processcsv18 <- function(my_df, gene_names, my_sample_no_18){
   my_df$sample_ID = my_sample_no_18
@@ -74,12 +78,13 @@ p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID)))+
 p_18
 
 line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
-  geom_density(colour = "darkslateblue") +
-  theme_classic2()+ 
+  geom_density(colour = "red") +
+  theme_minimal()+ 
   ggtitle("18 somite stage")+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(text=element_text(size = 13, family = "sans"))+
-  labs(x="NM index", y="Density")
+  labs(x="NM index", y="Density")+
+  scale_y_continuous(limits = c(0,1.6))
 line_18
 
 
@@ -144,8 +149,16 @@ p3_21 <- p2_21 + ggtitle("21 somite stage") + theme(legend.position = "none") + 
 p3_21
 
 line_21 <- ggplot(df_combined_21, aes(x=nm_index))+
-  geom_density(colour = "orange")+ theme_minimal()+ ggtitle("21 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
+  geom_density(colour = "orange")+
+  theme_minimal()+ 
+  ggtitle("21 somite stage")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text=element_text(size = 15, family = "sans"))+
+  labs(x="NM index", y="Density")+
+  scale_y_continuous(limits = c(0,1.6))
+
 line_21
+
 
 # 24ss 
 
@@ -210,7 +223,13 @@ p3_24 <- p2_24 + ggtitle("24 somite stage") + theme(legend.position = "none") + 
 p3_24
 
 line_24 <- ggplot(df_combined_24, aes(x=nm_index))+
-  geom_density(colour = "gold")+ theme_minimal()+ ggtitle("24 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
+  geom_density(colour = "gold")+
+  theme_minimal()+ 
+  ggtitle("24 somite stage")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text=element_text(size = 15, family = "sans"))+
+  labs(x="NM index", y="Density")+
+  scale_y_continuous(limits = c(0,1.6))
 line_24
 # 26-28ss
 processcsv2628ss <- function(my_df, gene_names, my_sample_no_2628ss){
@@ -273,7 +292,13 @@ p3_2628 <- p2_2628 + ggtitle("26-28 somite stage") + theme(legend.position = "no
 p3_2628
 
 line_2628ss <- ggplot(df_combined_2628ss, aes(x=nm_index))+
-  geom_density(colour = "green")+ theme_minimal()+ ggtitle("26-28 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
+  geom_density(colour = "green")+ 
+  theme_minimal()+ 
+  ggtitle("26-28 somite stage")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text=element_text(size = 15, family = "sans"))+
+  labs(x="NM index", y="Density")+
+  scale_y_continuous(limits = c(0,1.6))
 
 line_2628ss
 # 30ss
@@ -338,7 +363,14 @@ p3_30 <- p2_30 + ggtitle("30 somite stage") + theme(legend.position = "none") + 
 p3_30
 
 line_30ss <- ggplot(df_combined_30ss, aes(x=nm_index, y=))+
-  geom_density(colour = "blue")+ theme_minimal()+ ggtitle("30 somite stage")+theme(plot.title = element_text(hjust = 0.5))+theme(text=element_text(size = 15, family = "sans"))
+  geom_density(colour = "blue")+ 
+  theme_minimal()+ 
+  ggtitle("30 somite stage")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(text=element_text(size = 15, family = "sans"))+
+  labs(x="NM index", y="Density")+
+  scale_y_continuous(limits = c(0,1.6))
+
 line_30ss
 
 # combine dataframes
@@ -390,12 +422,14 @@ ggarrange(line_18, line_21  + rremove("ylab"), line_24 + rremove("ylab"), line_2
 compare_lines <- ggplot(df_combined_final, aes(x=nm_index, y=, colour=ssnumber))+
   geom_density(size=2) +
   #]theme(panel.background = element_rect(fill = "black")) + 
-  labs(x="NM index", y="Density", title = "Comparison across all somite stages") +
+  labs(x="NM index", y="Density") +
+  ggtitle("Comparison across all somite stages")+
   theme(plot.title = element_text(hjust = 0.5))+
   theme_minimal()+
   theme(text=element_text(size = 15, family = "sans"))+
   scale_color_viridis_d(labels=c("18", "21", "24", "26-28", "30"), option = "D")+
-  guides(colour=guide_legend(title="Somite stage"))
+  guides(colour=guide_legend(title="Somite stage"))+
+  scale_x_continuous(limits = c(-1,1))
 
 compare_lines
 

@@ -158,20 +158,24 @@ p_lineage_only <- ggplot(df_combined, aes(x=lineage_index, fill = factor(sample_
   geom_histogram(binwidth = 0.2, color="black")+
   scale_x_continuous(name = "Lineage index",limits=c(-1, 1))+
   theme_minimal()+
-  scale_fill_manual(values=plasma(n=length(my_csv_files_cdh_hes)))+
+  scale_fill_manual(values=viridis(n=length(my_csv_files_cdh_hes)))+
   theme(text = element_text(size = 15, family = "sans"))+
   ggtitle("Lineage marker distribution")+
   #theme(legend.position = "none")+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  guides(fill=guide_legend(title = "Sample no."))+
+  labs(y="Number of cells")
+
 
 p_lineage_only
 
 line_lineage <- ggplot(df_combined, aes(x=lineage_index, y=))+
-  geom_density(colour = "blue")+
+  geom_density(colour = "purple4", size = 2)+
   theme_minimal()+
   ggtitle("Lineage marker distribution")+
   theme(plot.title = element_text(hjust = 0.5))+
-  theme(text = element_text(size = 15, family = "sans"))
+  theme(text = element_text(size = 15, family = "sans"))+
+  labs(x="Lineage Index", y="Density")
 
 line_lineage
 
@@ -181,11 +185,11 @@ p_nmp_lineage <- ggplot(df_combined, aes(x=nm_index, y=lineage_index, color = fa
   geom_point()+
   geom_smooth(method = "lm", color="navy", fill="lightblue")+
   theme_minimal()+
-  labs(x = "NM index", y = "Lineage index", title = "Indeterminacy of NMPs")+
+  labs(x = "NM index", y = "Lineage index", title = "Indecisiveness of NMPs")+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(text = element_text(size = 15, family = "sans"))+
   stat_cor(method = "pearson")+
-  scale_colour_viridis_d(direction = -1)+
+  scale_colour_manual(values = viridis(n=5, begin = 0, end = 0.9))+
   guides(colour=guide_legend(title="Sample no."))
 p_nmp_lineage
 
@@ -193,7 +197,7 @@ p_nmp_lineage_group <- ggplot(df_combined, aes(x=nm_index, y=lineage_index))+
   geom_point()+
   geom_smooth(method = "lm", color="navy", fill="lightblue")+
   theme_minimal()+
-  labs(x = "NM index", y = "Lineage index", title = "Indeterminacy of NMPs")+
+  labs(x = "NM index", y = "Lineage index", title = "Indecisiveness of NMPs")+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(text = element_text(size = 15, family = "sans"))+
   stat_cor(method = "pearson")
