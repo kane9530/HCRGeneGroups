@@ -73,8 +73,11 @@ p_18 <- ggplot(df_combined_18, aes(x=nm_index, fill = factor(sample_ID)))+
   theme_minimal() + 
   labs(x="NM index", y="Number of Cells")+
   ggtitle("18 somite stage") + 
-  theme(plot.title = element_text(hjust = 0.5))+
-  guides(fill=guide_legend(title="Sample no."))
+  theme(plot.title = element_text(hjust = 0.5, size = 15))+
+  guides(fill=guide_legend(title="Sample no."))+
+  theme(axis.title = element_text(size = 15))+
+  theme(legend.text = element_text(size = 13))+
+  theme(legend.title = element_text(size = 15))
 p_18
 
 line_18 <- ggplot(df_combined_18, aes(x=nm_index))+
@@ -431,6 +434,7 @@ compare_lines <- ggplot(df_combined_final, aes(x=nm_index, y=, colour=ssnumber))
   guides(colour=guide_legend(title="Somite stage"))+
   scale_x_continuous(limits = c(-1,1))
 
+
 compare_lines
 
 #and then something with plyrs join(), actually maybe rowbind
@@ -476,11 +480,18 @@ nmp_sox2_tbxta <- ggplot(data = df_combined_final, mapping = aes())+
 nmp_sox2_tbxta
 
 nmp_sox2_tbxta_norm <- ggplot(data = df_combined_final)+
-  geom_density(aes(x=sox2_normalise, colour = "Sox2"), size = 3)+
-  geom_density(aes(x=tbxta_normalise, colour = "Tbxta"), size = 3)+
+  geom_density(aes(x=sox2_normalise, colour = "Sox2"), size = 2)+
+  geom_density(aes(x=tbxta_normalise, colour = "Tbxta"), size = 2)+
   xlab("Normalised intensity values")+
-  scale_colour_manual("", breaks = c("Sox2", "Tbxta"),
-                      values = c("red", "blue"))+
-  theme_minimal()
+  ylab("Density")+
+  #scale_colour_manual("", breaks = c("Sox2", "Tbxta"),
+                     # values = c("red", "blue"))+
+  theme_minimal()+
+  guides(colour=guide_legend(title = "Transcription factor"))+
+  ggtitle("Heterogeneity of NMPs")+
+  theme(plot.title = element_text(hjust = 0.5, size = 15))+
+  theme(axis.title = element_text(size = 15))+
+  theme(legend.text = element_text(size = 13))+
+  theme(legend.title = element_text(size = 15))
 nmp_sox2_tbxta_norm
 

@@ -279,8 +279,15 @@ numbers_of_nmps_vs_co_nmps <-  ggplot(merged_df_nmps, aes(x=id, y=, fill = facto
   ggtitle("Number of NMPs vs number of All-4's")+
   theme_minimal()+
   guides(fill=guide_legend(title="Type of cell"))+
-  scale_fill_manual(values = viridis(n=2, begin = 0, end = 0.5))
+  #scale_fill_manual(values = viridis(n=2, begin = 0, end = 0.5))+
+  ylab("Number of cells")+
+  xlab("Type of cell")+
+  theme(axis.title = element_text(size = 15))+
+  theme(legend.text = element_text(size = 13))+
+  theme(legend.title = element_text(size = 15))+
+  theme(plot.title = element_text(size = 15, hjust = 0.5))
 numbers_of_nmps_vs_co_nmps
+
 
 ##Kane asked for a breakdown of what constitutes the indeterminates.
 

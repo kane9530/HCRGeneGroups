@@ -13,7 +13,10 @@ library(ggridges)
 library(RColorBrewer)
 
 
-#####processing for mesodermal progenitors
+#####processing for notochord progenitors
+#####Where I say mp I really mean notochord progenitor, it's just that I didn't know they were NPs
+#####Will tidy up the code when I have submitted my project report haha
+
 processcsvmp <- function(my_df, gene_names, my_sample_mp){
   my_df$sample_ID = my_sample_mp
   csv <- select(my_df, starts_with("Intensity"), "ID", "sample_ID")
@@ -26,7 +29,7 @@ processcsvmp <- function(my_df, gene_names, my_sample_mp){
 
 ##### Importing MP data
 
-dirmp <- list.dirs(path = "./dataCsv/mesodermal_progenitors")[-1]
+dirmp <- list.dirs(path = "./dataCsv/notochord_progenitors")[-1]
 
 my_dir_mp_csv<- dirmp %>% 
   map(~list.files(path = ., pattern="\\.csv$", full.names = TRUE)) 
@@ -73,7 +76,7 @@ df_combined_mp <- my_csv_files_proc_merged_mp %>%
 
 p_mp <- ggplot(df_combined_mp, aes(x=nm_index))+ 
   geom_histogram()+
-  labs(title = "Mesodermal progenitors")
+  labs(title = "Notochord progenitors")
 p_mp
 
 ##### What happens if I normalise according to NMP population?
@@ -97,13 +100,13 @@ df_combined_mesodermal_progenitors <- my_csv_files_proc_merged_mp %>%
 
 p_mp_norm_nmp <- ggplot(df_combined_mesodermal_progenitors, aes(x=nm_index))+
   geom_histogram()+
-  labs(title = "Mesodermal progenitors normalised to NMPS")
+  labs(title = "Notochord progenitors normalised to NMPS")
 
 p_mp_norm_nmp
 
 line_mp_norm_nmp <- ggplot(df_combined_mesodermal_progenitors, aes(x=nm_index))+
   geom_density()+
-  labs(title = "Mesodermal progenitors normalised to NMPS")+
+  labs(title = "Notochord progenitors normalised to NMPS")+
   theme_minimal()
 
 line_mp_norm_nmp
@@ -195,7 +198,7 @@ df_combined_het <- bind_rows(df_combined_mesodermal_progenitors, df_combined_neu
 
 df_combined_het$origin <- as.factor(df_combined_het$origin)
 
-levels(df_combined_het$origin) <- c("MP", "NT")
+levels(df_combined_het$origin) <- c("NP", "NT")
 
 #Plotting
 
@@ -204,8 +207,9 @@ line_both <- ggplot(df_combined_het, aes(x=nm_index, colour=factor(origin)))+
   scale_x_continuous( limits=c(-0.75, 0.75))+
   guides(colour=guide_legend(title = "Type of cell"))+
   theme_minimal()+
-  labs(x="NM Index", y="Density", title = "NM index in Mesodermal Progenitors and Neural Tube cells")+
-  theme(plot.title = element_text(hjust = 0.5))
+  labs(x="NM Index", y="Density", title = "NM index in Notochord Progenitors and Neural Tube cells")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_colour_manual(values = viridis(n=2, begin = 0.05, end = 0.95))
 
 line_both
 
@@ -275,12 +279,12 @@ df_all_3 <- bind_rows(df_combined_mesodermal_progenitors, df_combined_neural_fil
 
 df_all_3$origin <- as.factor(df_all_3$origin)
 
-levels(df_all_3$origin) <- c("NMP", "NT", "MP")
+levels(df_all_3$origin) <- c("NP", "NT", "NMP")
 
 ### Plotting all 3 populations of cells into a graph
 
 line_all_3 <- ggplot(df_all_3, aes(x=nm_index, fill=factor(origin)))+
-  geom_histogram(position = "identity", alpha = 0.6, colour="grey2")+
+  geom_histogram(position = "identity", alpha = 0.5, colour="grey2")+
   theme_minimal()+
   labs(x="NM index", y="Density")+
   ggtitle("Comparisons of heterogeneity across 3 populations of cells")+
@@ -288,7 +292,8 @@ line_all_3 <- ggplot(df_all_3, aes(x=nm_index, fill=factor(origin)))+
   guides(fill=guide_legend("Type of cell"))+
   scale_x_continuous(limits = c(-1, 1))+
   #scale_fill_manual(values = c("orange", "yellow", "red"))
-  scale_fill_manual(values = viridis(n=3))
+  scale_fill_manual(values = viridis(n=3))+
+  theme(text = element_text(size = 15))
 line_all_3
 
 plot_all_3 <- ggplot(df_all_3, aes(x=nm_index, fill=factor(origin)))+
@@ -296,16 +301,18 @@ plot_all_3 <- ggplot(df_all_3, aes(x=nm_index, fill=factor(origin)))+
 plot_all_3
 ### Trying out a new plotting function, ggridges
 
-df_all_3$origin <- factor(df_all_3$origin, levels = c("NMP", "NT", "MP"))
+df_all_3$origin <- factor(df_all_3$origin, levels = c("NMP", "NT", "NP"))
 
 ridge_all_3 <- ggplot(df_all_3, aes(x=nm_index, y=origin, fill = factor(origin)))+
-  geom_density_ridges(scale=5, show.legend = F, alpha = 0.5)+
+  geom_density_ridges(scale=5, show.legend = T, alpha = 0.5)+
   theme_minimal()+
-  scale_fill_manual(values = c("orange", "yellow", "red"))+
+  scale_fill_manual(values = viridis(n=3, direction = -1, begin = 0.05, end = 0.95))+
   scale_x_continuous(limits = c(-1, 1))+
   labs(x="NM index", y="Origin of cell")+
   ggtitle("The heterogeneity of different cell populations")+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  guides(fill=guide_legend("Type of Cell"))+
+  theme(text = element_text(size = 15))
 
 ridge_all_3
 
